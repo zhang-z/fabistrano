@@ -20,6 +20,8 @@ def set_defaults():
         ('python_bin', 'python'),
         ('remote_owner', 'www-data'),
         ('remote_group', 'www-data'),
+        ('update_env', True),
+        ('deploy_via', 'remote_clone'),
         ('current_path', path.join(env.domain_path, 'current')),
         ('releases_path', path.join(env.domain_path, 'releases')),
         ('shared_path', path.join(env.domain_path, 'shared')),

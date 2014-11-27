@@ -1,6 +1,7 @@
 from fabric.api import env, run
 from fabric.tasks import Task
 from fabistrano.helpers import set_defaults, sudo_run
+from fabistrano.deploy_strategies import remote_clone, local_clone
 
 
 VERSION = "0.4"
@@ -26,9 +27,17 @@ class RestartTask(BaseTask):
     def task(self):
         """Restarts your application"""
         try:
-            run('touch %(current_release)s/%(wsgi_path)s' %
-                {'current_release': env.current_release,
-                 'wsgi_path': env.wsgi_path})
+            if env.wsgi_path.startswith('/'):
+                # user specifies absolute path
+                touch_file_path = env.wsgi_path
+            else:
+                # relative path. In this case, I prefer "env.domain_path/env.wsgi_path"
+                # but original author choose "env.current_release/env.wsgi_path",
+                # for backward compatibility, follow it
+                touch_file_path = '%(current_release)s/%(wsgi_path)s' %\
+                                  {'current_release': env.current_release,
+                                   'wsgi_path': env.wsgi_path}
+            run('touch %s' % touch_file_path)
         except AttributeError:
             try:
                 sudo_run(env.restart_cmd)
@@ -59,24 +68,14 @@ class SetupTask(BaseTask):
 setup = SetupTask()
 
 
-def checkout():
-    """Checkout code to the remote servers"""
-    from time import time
-    env.current_release = '%(releases_path)s/%(time).0f' % {'releases_path': env.releases_path, 'time': time()}
-    run('cd %(releases_path)s; git clone -b %(git_branch)s -q %(git_clone)s %(current_release)s' %
-        {'releases_path': env.releases_path,
-         'git_clone': env.git_clone,
-         'current_release': env.current_release,
-         'git_branch': env.git_branch})
-
-
 class UpdateTask(BaseTask):
     name = 'update'
 
     def task(self):
         """Copies your project and updates environment and symlink"""
-        UpdateCodeTask().run()
-        update_env()
+        update_code.run()
+        if env.update_env:
+            update_env()
         symlink()
         set_current()
         permissions()
@@ -89,10 +88,15 @@ class UpdateCodeTask(BaseTask):
 
     def task(self):
         """Copies your project to the remote servers"""
-        checkout()
+        if env.deploy_via == 'remote_clone':
+            remote_clone()
+        elif env.deploy_via == 'local_clone':
+            local_clone()
+        else:
+            raise NotImplementedError
         permissions()
 
-update_code_task = UpdateCodeTask()
+update_code = UpdateCodeTask()
 
 
 def symlink():
@@ -149,7 +153,7 @@ class RollBackTask(BaseTask):
     def task(self):
         """Rolls back to a previous version and restarts"""
         rollback_code()
-        RestartTask().run()
+        restart.run()
 
 rollback = RollBackTask()
 
@@ -160,7 +164,7 @@ class DeployTask(BaseTask):
 
     def task(self):
         """Deploys your project. This calls both `update' and `restart'"""
-        UpdateTask().run()
-        RestartTask().run()
+        update.run()
+        restart.run()
 
 deploy = DeployTask(default=True)

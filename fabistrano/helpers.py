@@ -46,16 +46,6 @@ def set_defaults():
     env._fabi_defaults = True
 
 
-def with_defaults(func):
-    """A decorator that sets all defaults for a task."""
-
-    @functools.wraps(func)
-    def decorated(*args, **kwargs):
-        set_defaults()
-        return func(*args, **kwargs)
-    return decorated
-
-
 def sudo_run(*args, **kwargs):
     if env.use_sudo:
         sudo(*args, **kwargs)

@@ -11,16 +11,19 @@ env.timeout = 6000
 class BaseTask(Task):
     def __init__(self, *args, **kwargs):
         super(BaseTask, self).__init__(*args, **kwargs)
-        set_defaults()
 
     def run(self):
+        set_defaults()
+        self.task()
+
+    def task(self):
         raise NotImplementedError
 
 
-class RestartTask(Task):
+class RestartTask(BaseTask):
     name = 'restart'
 
-    def run(self):
+    def task(self):
         """Restarts your application"""
         try:
             run('touch %(current_release)s/%(wsgi_path)s' %
@@ -32,6 +35,8 @@ class RestartTask(Task):
             except AttributeError:
                 pass
 
+restart = RestartTask()
+
 
 def permissions():
     """Make the release group-writable"""
@@ -42,14 +47,16 @@ def permissions():
     sudo_run('chmod -R g+w %(domain_path)s' % {'domain_path': env.domain_path})
 
 
-class SetupTask(Task):
+class SetupTask(BaseTask):
     name = 'setup'
 
-    def run(self):
+    def task(self):
         """Prepares one or more servers for deployment"""
         sudo_run('mkdir -p %(domain_path)s/{releases,shared}' % {'domain_path': env.domain_path})
         sudo_run('mkdir -p %(shared_path)s/{system,log}' % {'shared_path': env.shared_path})
         permissions()
+
+setup = SetupTask()
 
 
 def checkout():
@@ -63,10 +70,10 @@ def checkout():
          'git_branch': env.git_branch})
 
 
-class UpdateTask(Task):
+class UpdateTask(BaseTask):
     name = 'update'
 
-    def run(self):
+    def task(self):
         """Copies your project and updates environment and symlink"""
         UpdateCodeTask().run()
         update_env()
@@ -74,14 +81,18 @@ class UpdateTask(Task):
         set_current()
         permissions()
 
+update = UpdateTask()
 
-class UpdateCodeTask(Task):
+
+class UpdateCodeTask(BaseTask):
     name = 'update_code'
 
-    def run(self):
+    def task(self):
         """Copies your project to the remote servers"""
         checkout()
         permissions()
+
+update_code_task = UpdateCodeTask()
 
 
 def symlink():
@@ -103,10 +114,10 @@ def update_env():
     permissions()
 
 
-class CleanUpTask(Task):
+class CleanUpTask(BaseTask):
     name = 'cleanup'
 
-    def run(self):
+    def task(self):
         """Clean up old releases"""
         if len(env.releases) > 3:
             directories = env.releases
@@ -115,6 +126,8 @@ class CleanUpTask(Task):
             env.directories = ' '.join(['%(releases_path)s/%(release)s' %
                                         {'releases_path': env.releases_path, 'release': release} for release in directories])
             run('rm -rf %(directories)s' % {'directories': env.directories})
+
+cleanup = CleanUpTask()
 
 
 def rollback_code():
@@ -130,19 +143,24 @@ def rollback_code():
             {'current_release': env.current_release, 'previous_release': env.previous_release, 'current_path': env.current_path})
 
 
-class RollBackTask(Task):
+class RollBackTask(BaseTask):
     name = 'rollback'
 
-    def run(self):
+    def task(self):
         """Rolls back to a previous version and restarts"""
         rollback_code()
         RestartTask().run()
 
+rollback = RollBackTask()
 
-class DeployTask(Task):
+
+class DeployTask(BaseTask):
     name = 'deploy'
+    is_default = True
 
-    def run(self, default=True):
+    def task(self):
         """Deploys your project. This calls both `update' and `restart'"""
         UpdateTask().run()
         RestartTask().run()
+
+deploy = DeployTask(default=True)

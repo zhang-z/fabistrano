@@ -11,7 +11,6 @@ def dir_exists(dir_path):
 def set_defaults():
     if '_fabi_defaults' in env:
         return
-
     domain_path = path.join(env.base_dir, env.app_name)
     # domain_path must be set separately, since it's referred in other defaults
     env.setdefault('domain_path', domain_path)

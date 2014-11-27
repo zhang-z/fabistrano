@@ -19,6 +19,9 @@ setup(
     author_email='diego@lapiduz.com',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=[
+        'fabric',
+    ],
     url='http://github.com/dlapiduz/fabistrano',
     license='License :: OSI Approved :: BSD License',
     description="Capistrano style deployments with Fabric",

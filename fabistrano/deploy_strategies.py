@@ -1,6 +1,7 @@
 from os import path
 from time import time
-from fabric.api import env, run, local, put, cd
+from fabric.api import env, local, put, cd
+from fabistrano.helpers import sudo_run
 
 
 def prepare_for_checkout():
@@ -12,19 +13,20 @@ def prepare_for_checkout():
 
 def remote_clone():
     """Checkout code to the remote servers"""
-    prepare_for_checkout()
-    run('cd %(releases_path)s; git clone -b %(git_branch)s -q %(git_clone)s %(current_release)s' %
-        {'releases_path': env.releases_path,
-         'git_clone': env.git_clone,
-         'current_release': env.current_release,
-         'git_branch': env.git_branch})
+    sudo_run('cd %(releases_path)s; git clone -b %(git_branch)s -q %(git_clone)s %(current_release)s' %
+             {'releases_path': env.releases_path,
+              'git_clone': env.git_clone,
+              'current_release': env.current_release,
+              'git_branch': env.git_branch})
 
 
 def local_clone():
     """Checkout code to local machine, then upload to servers"""
     prepare_for_checkout()
-    cache_name = '%(app_name)s_%(commit_id)s.tar.bz2' %\
-                 {'app_name': env.app_name, 'commit_id': env.commit_id}
+    cache_name = '%(app_name)s_%(branch_name)s_%(commit_id)s.tar.bz2' %\
+                 {'app_name': env.app_name,
+                  'branch_name': env.git_branch,
+                  'commit_id': env.commit_id}
     local_cache = '/tmp/' + cache_name
     if not path.exists(local_cache):
         local('git archive --remote=%(git_clone)s %(git_branch)s | bzip2 > %(local_cache)s' %
@@ -32,6 +34,6 @@ def local_clone():
                'git_branch': env.git_branch,
                'local_cache': local_cache})
     put(local_cache, '/tmp/')
-    run('mkdir -p %s' % env.current_release)
+    sudo_run('mkdir -p %s' % env.current_release)
     with cd(env.current_release):
-        run('tar jxf /tmp/%s' % cache_name)
+        sudo_run('tar jxf /tmp/%s' % cache_name)

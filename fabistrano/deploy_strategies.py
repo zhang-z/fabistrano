@@ -23,9 +23,8 @@ def remote_clone():
 def local_clone():
     """Checkout code to local machine, then upload to servers"""
     prepare_for_checkout()
-    cache_name = '%(app_name)s_%(branch_name)s_%(commit_id)s.tar.bz2' %\
-                 {'app_name': env.app_name,
-                  'branch_name': env.git_branch,
+    cache_name = '%(branch_name)s_%(commit_id)s.tar.bz2' %\
+                 {'branch_name': env.git_branch,
                   'commit_id': env.commit_id}
     local_cache = '/tmp/' + cache_name
     if not path.exists(local_cache):

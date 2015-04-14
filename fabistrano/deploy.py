@@ -4,8 +4,6 @@ from fabistrano.helpers import set_defaults, sudo_run
 from fabistrano.deploy_strategies import remote_clone, local_clone, remote_export, local_export
 
 
-VERSION = "0.4"
-
 env.timeout = 6000
 
 

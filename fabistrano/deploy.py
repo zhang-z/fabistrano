@@ -1,7 +1,7 @@
 from fabric.api import env
 from fabric.tasks import Task
 from fabistrano.helpers import set_defaults, sudo_run
-from fabistrano.deploy_strategies import remote_clone, local_clone
+from fabistrano.deploy_strategies import remote_clone, local_clone, remote_export, local_export
 
 
 VERSION = "0.4"
@@ -92,6 +92,10 @@ class UpdateCodeTask(BaseTask):
             remote_clone()
         elif env.deploy_via == 'local_clone':
             local_clone()
+        elif env.deploy_via == 'remote_export':
+            remote_export()
+        elif env.deploy_via == 'local_export':
+            local_export()
         else:
             raise NotImplementedError
         permissions()
@@ -113,9 +117,16 @@ def set_current():
 
 def update_env():
     """Update servers environment on the remote servers"""
+    """
     sudo_run('cd %(current_release)s; pip install -r requirements.txt' %
              {'current_release': env.current_release})
     permissions()
+    """
+    print 'Function REMOVED!!'
+    print 'As we should always use virtual environment for our project,'
+    print 'the current implementation does not satisfy the requirement.'
+    print 'The existence of the current function is dangerous to server enviroment.'
+    print 'Therefore we removed it.'
 
 
 class CleanUpTask(BaseTask):

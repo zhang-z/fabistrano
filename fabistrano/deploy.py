@@ -1,7 +1,7 @@
 from fabric.api import env
 from fabric.tasks import Task
 from fabistrano.helpers import set_defaults, sudo_run
-from fabistrano.deploy_strategies import remote_clone, local_clone, remote_export, local_export
+from fabistrano.deploy_strategies import remote_clone, local_clone, remote_export, local_export, localcopy
 
 
 env.timeout = 6000
@@ -94,6 +94,8 @@ class UpdateCodeTask(BaseTask):
             remote_export()
         elif env.deploy_via == 'local_export':
             local_export()
+        elif env.deploy_via == 'localcopy':
+            localcopy()
         else:
             raise NotImplementedError
         permissions()

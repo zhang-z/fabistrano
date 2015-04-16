@@ -64,6 +64,44 @@ Using fabistrano you get the following benefits:
 
 And you should be good to go!
 
+## Deploy Strategy
+
+There are 5 strategies you can use for deployment.
+
+1. Git archive on remote servers.
+  ```
+    env.deploy_via = 'remote_clone'
+    env.git_clone  = 'GIT_PATH' # Your git url
+  ```
+
+2. Git archive on local machine and then upload to remote servers.
+  ```
+    env.deploy_via = 'local_clone'
+    env.git_clone  = 'GIT_PATH' # Your git url
+  ```
+
+3. SVN export on remote servers.
+  ```
+    env.deploy_via   = 'remote_export'
+    env.svn_repo     = 'SVN REPO URL'
+    env.svn_username = 'SVN USERNAME' # optinal
+    env.svn_password = 'SVN PASSWORD' # optinal
+  ```
+
+4. SVN export on local machine and then upload to remote servers.
+  ```
+    env.deploy_via   = 'local_export'
+    env.svn_repo     = 'SVN REPO URL'
+    env.svn_username = 'SVN USERNAME' # optinal
+    env.svn_password = 'SVN PASSWORD' # optinal
+  ```
+
+5. Archive a copy on local machine and upload to remote servers to deploy.
+  ```
+    env.deploy_via   = 'localcopy'
+    env.localcopy_path = '/project/path/on/your/pc/name_xyz'
+  ```
+
 ## Current status
 
 This tool is under active development and you might see errors.

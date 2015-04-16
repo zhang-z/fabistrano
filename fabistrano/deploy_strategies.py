@@ -1,6 +1,7 @@
 from os import path
 from time import time
-from fabric.api import env, local, put, cd
+import uuid
+from fabric.api import env, local, put, cd, run
 from fabistrano.helpers import sudo_run
 
 
@@ -146,3 +147,36 @@ def local_export():
             'current_release': env.current_release,
         })
 
+
+def localcopy():
+    """ Deploy local copy to servers """
+    # set new release env
+    prepare_for_checkout()
+    
+    # start
+    cache_name = '%(app_name)s_%(current_revision)s' % {
+        'app_name': env.app_name,
+        'current_revision': env.current_revision,}
+    
+    local('cp -rf %(localcopy_path)s /tmp/%(cache_name)s && cd /tmp/ && tar cvzf %(cache_name)s.tar.gz %(cache_name)s' % {
+        'localcopy_path': env.localcopy_path,
+        'cache_name': cache_name,
+        })
+    
+    # We add a guid for tmp folder on server is to avoid conflict
+    # when deploying onto localhost, mainly for testing purpose.
+    server_tmp_folder = '/tmp/%(guid)s' % {'guid': uuid.uuid4().hex}
+    
+    sudo_run('mkdir -p %(dir)s && chmod 777 %(dir)s' % {'dir':server_tmp_folder})
+    
+    put('/tmp/%(cache_name)s.tar.gz' % {'cache_name': cache_name}, server_tmp_folder)
+    
+    with cd(server_tmp_folder):
+        sudo_run('tar -xvf %(cache_name)s.tar.gz' % {
+            'cache_name': cache_name,
+            })
+        
+        sudo_run('mv %(cache_name)s %(current_release)s' % {
+            'cache_name': cache_name,
+            'current_release': env.current_release,
+        })

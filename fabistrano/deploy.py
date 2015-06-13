@@ -103,6 +103,8 @@ def symlink():
     """Updates the symlink to the most recently deployed version"""
     sudo_run('ln -nfs %(shared_path)s/log %(current_release)s/log' %
              {'shared_path': env.shared_path, 'current_release': env.current_release})
+    sudo_run('ln -nfs %(shared_path)s/static %(current_release)s/static' %
+             {'shared_path': env.shared_path, 'current_release': env.current_release})
 
 
 def set_current():

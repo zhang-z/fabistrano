@@ -106,7 +106,7 @@ There are 5 strategies you can use for deployment.
 ## Environment Variables
 
 - shared_dirs - list, default: ['log']
-  ```python
+  ```
     # List of dir names which will be created in shared folder during setup.
     # These dirs will be soft-linked to current release during each deployment.
     # Default: ['log']

@@ -105,13 +105,13 @@ There are 5 strategies you can use for deployment.
 
 ## Environment Variables
 
-- shared_dirs - list, default: ['log']
+- shared_dirs
   ```
     # List of dir names which will be created in shared folder during setup.
     # These dirs will be soft-linked to current release during each deployment.
     # Default: ['log']
     # You can override in your own settings:
-    shared_dirs = ['log', 'static', 'tmp']
+    env.shared_dirs = ['log', 'static', 'tmp']
   ```
 
 ## Current status

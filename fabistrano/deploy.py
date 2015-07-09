@@ -59,8 +59,17 @@ class SetupTask(BaseTask):
 
     def task(self):
         """Prepares one or more servers for deployment"""
-        sudo_run('mkdir -p %(domain_path)s/{releases,shared}' % {'domain_path': env.domain_path})
-        sudo_run('mkdir -p %(shared_path)s/{system,log}' % {'shared_path': env.shared_path})
+        sudo_run('mkdir -p %(domain_path)s/{releases,shared}' % {
+                 'domain_path': env.domain_path})
+
+        if env.shared_dirs:
+            dirs = ','.join(env.shared_dirs)
+            if len(env.shared_dirs) > 1:
+                dirs = '{'+dirs+'}'
+
+            sudo_run('mkdir -p %(shared_path)s/%(dirs)s' % {
+                     'shared_path': env.shared_path, 'dirs': dirs})
+
         permissions()
 
 setup = SetupTask()
@@ -105,8 +114,13 @@ update_code = UpdateCodeTask()
 
 def symlink():
     """Updates the symlink to the most recently deployed version"""
-    sudo_run('ln -nfs %(shared_path)s/log %(current_release)s/log' %
-             {'shared_path': env.shared_path, 'current_release': env.current_release})
+    for dirname in env.shared_dirs:
+        cmd = 'ln -nfs %(shared_path)s/%(dirname)s %(current_release)s/%(dirname)s' % {
+            'shared_path': env.shared_path,
+            'current_release': env.current_release,
+            'dirname': dirname,
+        }
+        sudo_run(cmd)
 
 
 def set_current():

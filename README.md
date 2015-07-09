@@ -37,9 +37,10 @@ Using fabistrano you get the following benefits:
 2. In your `fabfile.py` you need to import fabistrano and set the environment variables:
 
   ```
+    from fabric.api import env
     from fabistrano import deploy
 
-    
+
     env.hosts = ["HOST"] # Replace with your host name or IP
     env.base_dir = '/www' # Set to your app's directory
     env.app_name = 'app_name.com' # This will deploy the app to /www/app_name.com/
@@ -102,6 +103,16 @@ There are 5 strategies you can use for deployment.
     env.localcopy_path = '/project/path/on/your/pc/name_xyz'
   ```
 
+## Environment Variables
+
+- shared_dirs
+  ```python
+    # List of dir names which will be created in shared folder during setup.
+    # These dirs will be soft-linked to current release during each deployment.
+    # Default: ['log']
+    # You can override in your own settings:
+    shared_dirs = ['log', 'static', 'tmp']
+
 ## Current status
 
 This tool is under active development and you might see errors.
@@ -109,7 +120,7 @@ This tool is under active development and you might see errors.
 ## License
 
 The template itself is available under the "Simplified" BSD license and can be
-freely modified under the terms of that license. You can see the 
+freely modified under the terms of that license. You can see the
 [full license text](https://github.com/dlapiduz/fabistrano/blob/master/LICENSE>)
 in the Github repository for additional detail.
 

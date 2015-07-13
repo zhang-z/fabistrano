@@ -31,7 +31,7 @@ def set_defaults():
         # The following dirs will be created in shared_path when setting up.
         # During deployment, these dirs will be soft-linked
         # from shared_path to the current dir.
-        ('shared_dirs', ['log']),
+        ('shared_dirs', ['log', 'static']),
     )
     for k, v in defaults:
         env.setdefault(k, v)

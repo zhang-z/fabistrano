@@ -37,9 +37,10 @@ Using fabistrano you get the following benefits:
 2. In your `fabfile.py` you need to import fabistrano and set the environment variables:
 
   ```
+    from fabric.api import env
     from fabistrano import deploy
 
-    
+
     env.hosts = ["HOST"] # Replace with your host name or IP
     env.base_dir = '/www' # Set to your app's directory
     env.app_name = 'app_name.com' # This will deploy the app to /www/app_name.com/
@@ -64,6 +65,57 @@ Using fabistrano you get the following benefits:
 
 And you should be good to go!
 
+## Deploy Strategy
+
+There are 5 strategies you can use for deployment.
+
+1. Git archive on remote servers.
+  ```
+    env.deploy_via = 'remote_clone'
+    env.git_clone  = 'GIT_PATH' # Your git url
+  ```
+
+2. Git archive on local machine and then upload to remote servers.
+  ```
+    env.deploy_via = 'local_clone'
+    env.git_clone  = 'GIT_PATH' # Your git url
+  ```
+
+3. SVN export on remote servers.
+  ```
+    env.deploy_via   = 'remote_export'
+    env.svn_repo     = 'SVN REPO URL'
+    env.svn_username = 'SVN USERNAME' # optinal
+    env.svn_password = 'SVN PASSWORD' # optinal
+  ```
+
+4. SVN export on local machine and then upload to remote servers.
+  ```
+    env.deploy_via   = 'local_export'
+    env.svn_repo     = 'SVN REPO URL'
+    env.svn_username = 'SVN USERNAME' # optinal
+    env.svn_password = 'SVN PASSWORD' # optinal
+  ```
+
+5. Archive a copy on local machine and upload to remote servers to deploy.
+  ```
+    env.deploy_via   = 'localcopy'
+    env.localcopy_path = '/project/path/on/your/pc/name_xyz'
+  ```
+
+## Environment Variables
+
+- shared_dirs
+
+  ```
+    from fabric.api import env
+    # List of dir names which will be created in shared folder during setup.
+    # These dirs will be soft-linked to current release during each deployment.
+    # Default: ['log']
+    # You can override in your own settings:
+    env.shared_dirs = ['log', 'static', 'tmp']
+  ```
+
 ## Current status
 
 This tool is under active development and you might see errors.
@@ -71,7 +123,7 @@ This tool is under active development and you might see errors.
 ## License
 
 The template itself is available under the "Simplified" BSD license and can be
-freely modified under the terms of that license. You can see the 
+freely modified under the terms of that license. You can see the
 [full license text](https://github.com/dlapiduz/fabistrano/blob/master/LICENSE>)
 in the Github repository for additional detail.
 

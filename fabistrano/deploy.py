@@ -1,10 +1,8 @@
 from fabric.api import env
 from fabric.tasks import Task
 from fabistrano.helpers import set_defaults, sudo_run
-from fabistrano.deploy_strategies import remote_clone, local_clone
+from fabistrano.deploy_strategies import remote_clone, local_clone, remote_export, local_export, localcopy
 
-
-VERSION = "0.4"
 
 env.timeout = 6000
 
@@ -61,8 +59,17 @@ class SetupTask(BaseTask):
 
     def task(self):
         """Prepares one or more servers for deployment"""
-        sudo_run('mkdir -p %(domain_path)s/{releases,shared}' % {'domain_path': env.domain_path})
-        sudo_run('mkdir -p %(shared_path)s/{system,log}' % {'shared_path': env.shared_path})
+        sudo_run('mkdir -p %(domain_path)s/{releases,shared}' % {
+                 'domain_path': env.domain_path})
+
+        if env.shared_dirs:
+            dirs = ','.join(env.shared_dirs)
+            if len(env.shared_dirs) > 1:
+                dirs = '{'+dirs+'}'
+
+            sudo_run('mkdir -p %(shared_path)s/%(dirs)s' % {
+                     'shared_path': env.shared_path, 'dirs': dirs})
+
         permissions()
 
 setup = SetupTask()
@@ -92,6 +99,12 @@ class UpdateCodeTask(BaseTask):
             remote_clone()
         elif env.deploy_via == 'local_clone':
             local_clone()
+        elif env.deploy_via == 'remote_export':
+            remote_export()
+        elif env.deploy_via == 'local_export':
+            local_export()
+        elif env.deploy_via == 'localcopy':
+            localcopy()
         else:
             raise NotImplementedError
         permissions()
@@ -101,10 +114,13 @@ update_code = UpdateCodeTask()
 
 def symlink():
     """Updates the symlink to the most recently deployed version"""
-    sudo_run('ln -nfs %(shared_path)s/log %(current_release)s/log' %
-             {'shared_path': env.shared_path, 'current_release': env.current_release})
-    sudo_run('ln -nfs %(shared_path)s/static %(current_release)s/static' %
-             {'shared_path': env.shared_path, 'current_release': env.current_release})
+    for dirname in env.shared_dirs:
+        cmd = 'ln -nfs %(shared_path)s/%(dirname)s %(current_release)s/%(dirname)s' % {
+            'shared_path': env.shared_path,
+            'current_release': env.current_release,
+            'dirname': dirname,
+        }
+        sudo_run(cmd)
 
 
 def set_current():
@@ -115,9 +131,16 @@ def set_current():
 
 def update_env():
     """Update servers environment on the remote servers"""
+    """
     sudo_run('cd %(current_release)s; pip install -r requirements.txt' %
              {'current_release': env.current_release})
     permissions()
+    """
+    print 'Function REMOVED!!'
+    print 'As we should always use virtual environment for our project,'
+    print 'the current implementation does not satisfy the requirement.'
+    print 'The existence of the current function is dangerous to server enviroment.'
+    print 'Therefore we removed it.'
 
 
 class CleanUpTask(BaseTask):

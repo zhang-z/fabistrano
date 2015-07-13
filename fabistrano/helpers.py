@@ -17,19 +17,30 @@ def set_defaults():
     defaults = (
         ('use_sudo', True),
         ('git_branch', 'master'),
+        ('svn_revision', 'HEAD'),
+        ('svn_username', ''),
+        ('svn_password', ''),
         ('python_bin', 'python'),
         ('remote_owner', 'www-data'),
         ('remote_group', 'www-data'),
-        ('update_env', True),
+        ('update_env', False), # Default to False, as we are removing this function.
         ('deploy_via', 'remote_clone'),
         ('current_path', path.join(env.domain_path, 'current')),
         ('releases_path', path.join(env.domain_path, 'releases')),
         ('shared_path', path.join(env.domain_path, 'shared')),
+        # The following dirs will be created in shared_path when setting up.
+        # During deployment, these dirs will be soft-linked
+        # from shared_path to the current dir.
+        ('shared_dirs', ['log']),
     )
     for k, v in defaults:
         env.setdefault(k, v)
 
     if dir_exists(env.releases_path):
+        # The current_release and previous_release set here
+        # are for RollBackTask. For deploy, set new value
+        # for current_release in your strategy.
+
         env.releases = sorted(run('ls -x %(releases_path)s' % {'releases_path': env.releases_path}).split())
 
         if len(env.releases) >= 1:

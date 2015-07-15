@@ -51,7 +51,8 @@ def permissions():
     #         {'domain_path': env.domain_path,
     #          'user': env.remote_owner,
     #          'group': env.remote_group})
-    sudo_run('chmod -R g+w %(domain_path)s' % {'domain_path': env.domain_path})
+    # sudo_run('chmod -R g+w %(domain_path)s' % {'domain_path': env.domain_path})
+    pass
 
 
 class SetupTask(BaseTask):

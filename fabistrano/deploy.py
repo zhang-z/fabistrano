@@ -47,10 +47,10 @@ restart = RestartTask()
 
 def permissions():
     """Make the release group-writable"""
-    sudo_run('chown -R %(user)s:%(group)s %(domain_path)s' %
-             {'domain_path': env.domain_path,
-              'user': env.remote_owner,
-              'group': env.remote_group})
+    # sudo_run('chown -R %(user)s:%(group)s %(domain_path)s' %
+    #         {'domain_path': env.domain_path,
+    #          'user': env.remote_owner,
+    #          'group': env.remote_group})
     sudo_run('chmod -R g+w %(domain_path)s' % {'domain_path': env.domain_path})
 
 

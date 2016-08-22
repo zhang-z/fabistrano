@@ -8,12 +8,13 @@ from fabistrano.helpers import sudo_run
 def prepare_for_checkout():
     # Set current datetime_sha1 as the name of release
     # use first 7 chars of commit hash
+    # Append user to end of string, for avoiding permission conflict.
     git_cmd = 'git ls-remote %(git_clone)s %(git_branch)s' % {
         'git_clone': env.git_clone, 'git_branch': env.git_branch,
     }
     commit_hash = local(git_cmd, capture=True).split('\t')[0]
     env.commit_hash = commit_hash
-    env.current_revision = datetime.now().strftime('%Y%m%d_%H%M%S_') + commit_hash[:7]
+    env.current_revision = datetime.now().strftime('%Y%m%d_%H%M%S_') + commit_hash[:7] + "_" + str(env.user)
     env.current_release = '%(releases_path)s/%(current_revision)s' % {
         'releases_path': env.releases_path, 'current_revision': env.current_revision,
     }
